@@ -1,0 +1,44 @@
+# Usefull links
+# =============
+# https://hub.docker.com/_/php/
+# https://docs.docker.com/compose/overview/
+# https://docs.docker.com/compose/compose-file/
+#
+# Usefull commands
+# ================
+#
+# Start containers
+# $ docker-compose up -d
+#
+# View running containers
+# $ docker-compose ps
+#
+# Connect into command line of running container
+# $ docker-compose run <container_name> bash
+# where <name> could be db_xxx, etc.
+# Tip: `Ctrl+p` + `Ctrl+q` + `Enter` (to exit container bash)
+#
+# View docker logs
+# $ docker-compose logs
+#
+# Stop containers
+# $ docker-compose down
+#
+# Remove images
+# $ docker rmi <name>
+#
+# Run non-default docker-compose file
+# $ docker-compose -f <file_name.yml> up -d
+# $ docker-compose -f <file_name.yml> down
+# $ docker-compose -f <file_name.yml> stop
+
+version: '3.7'
+
+services:
+  db:
+    image: percona
+    container_name: db_events_booking
+    env_file: deploy/docker/db.env
+    ports:
+      - target: 3306
+        published: 3306

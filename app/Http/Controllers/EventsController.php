@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Api\Interfaces\EventsServiceInterface;
+use App\Services\Contracts\EventsServiceInterface;
 use App\Http\Resources\EventResource;
 use Illuminate\Auth\Access\AuthorizationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;

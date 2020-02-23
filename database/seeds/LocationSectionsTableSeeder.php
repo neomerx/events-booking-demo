@@ -9,9 +9,9 @@ final class LocationSectionsTableSeeder extends Seeder
     // For testing purposes we use the same map image for each exhibition
     // As areas on the map we use rectangular, circle and poly (triangle) for demonstration purposes.
     const EXHIBITION_AREAS = [
-        ['Area 1', 'rect', '15,10,280,190', '90,70'],
-        ['Area 2', 'circle', '140,366,116', '100,330'],
-        ['Area 3', 'poly', '382,16,650,16,382,480', '420,80'],
+        ['A1', 'rect', '15,10,280,190', '29,9'],
+        ['A2', 'circle', '140,366,116', '29,60'],
+        ['A3', 'poly', '382,16,650,16,382,480', '57,15'],
     ];
 
     /**

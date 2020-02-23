@@ -2,7 +2,6 @@
 
 use App\Event;
 use App\EventSection;
-use App\Location;
 use App\LocationSection;
 use Illuminate\Database\Seeder;
 
@@ -20,7 +19,6 @@ final class EventSectionsTableSeeder extends Seeder
         foreach (Event::all() as $event) {
             $eventId  = $event->event_id;
             $location = $event->location;
-            assert($location instanceof Location);
             foreach ($location->locationSections as $section) {
                 assert($section instanceof LocationSection);
                 $sectionId = $section->location_section_id;

@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace App\Api;
+namespace App\Services;
 
-use App\Api\Interfaces\EventSectionsServiceInterface;
-use App\Api\Interfaces\EventsServiceInterface;
+use App\Services\Contracts\EventSectionsServiceInterface;
+use App\Services\Contracts\EventsServiceInterface;
 use App\Http\Resources\EventMarkerResource;
 use App\Http\Resources\EventResource;
 use Illuminate\Database\Eloquent\Collection;

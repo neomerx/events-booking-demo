@@ -2,11 +2,12 @@
 
 namespace Tests\Unit;
 
-use App\Api\EventsService;
-use App\Api\EventSectionsService;
-use App\Api\Interfaces\EventsServiceInterface;
+use App\Services\EventsService;
+use App\Services\EventSectionsService;
+use App\Services\Contracts\EventsServiceInterface;
 use App\Event;
 use Illuminate\Database\Connection;
+use Intervention\Image\ImageManager;
 use LocationsTableSeeder;
 use Tests\TestCase;
 use function count;
@@ -95,7 +96,7 @@ class EventMarkerServiceTest extends TestCase
         $connection = $this->app->get(Connection::class);
         $pdo        = $connection->getPdo();
 
-        return new EventsService(new EventSectionsService($pdo), $pdo);
+        return new EventsService(new EventSectionsService($pdo, new ImageManager()), $pdo);
     }
 
     /**

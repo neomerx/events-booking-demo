@@ -2,13 +2,14 @@
 
 namespace App\Providers;
 
-use App\Api\EventSectionsService;
-use App\Api\EventsService;
-use App\Api\Interfaces\EventSectionsServiceInterface;
-use App\Api\Interfaces\EventsServiceInterface;
+use App\Services\Contracts\EventSectionsServiceInterface;
+use App\Services\Contracts\EventsServiceInterface;
+use App\Services\EventSectionsService;
+use App\Services\EventsService;
 use Illuminate\Database\Connection;
 use Illuminate\Http\Resources\Json\Resource;
 use Illuminate\Support\ServiceProvider;
+use Intervention\Image\ImageManager;
 use Psr\Container\ContainerInterface;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,19 +21,26 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->bind(ImageManager::class, function () {
+            return new ImageManager();
+        });
         $this->app->bind(EventsServiceInterface::class, function (ContainerInterface $container) {
             /** @var Connection $connection */
             $connection = $container->get(Connection::class);
             $pdo        = $connection->getPdo();
+            /** @var EventSectionsServiceInterface $eventSectionsService */
+            $eventSectionsService = $container->get(EventSectionsServiceInterface::class);
 
-            return new EventsService(new EventSectionsService($pdo), $pdo);
+            return new EventsService($eventSectionsService, $pdo);
         });
         $this->app->bind(EventSectionsServiceInterface::class, function (ContainerInterface $container) {
             /** @var Connection $connection */
             $connection = $container->get(Connection::class);
             $pdo        = $connection->getPdo();
+            /** @var ImageManager $imageManager */
+            $imageManager = $container->get(ImageManager::class);
 
-            return new EventSectionsService($pdo);
+            return new EventSectionsService($pdo, $imageManager);
         });
     }
 

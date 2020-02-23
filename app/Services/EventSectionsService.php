@@ -1,13 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace App\Api;
+namespace App\Services;
 
-use App\Api\Interfaces\EventSectionsServiceInterface;
 use App\EventSection;
 use App\Http\Resources\EventSectionResource;
 use App\Rules\ActiveAndNonReservedEventSection;
+use App\Services\Contracts\EventSectionsServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
+use Intervention\Image\ImageManager;
 use PDO;
 
 /**
@@ -18,17 +20,33 @@ use PDO;
  */
 class EventSectionsService implements EventSectionsServiceInterface
 {
+    /** @var int Predefined size for logos */
+    private const LOGO_WIDTH = 100;
+
+    /** @var int Predefined size for logos */
+    private const LOGO_HEIGHT = 100;
+
+    /** @var string Image format to be used for logos */
+    private const LOGO_IMAGE_FORMAT = 'png';
+
     /**
      * @var PDO
      */
     private $pdo;
 
     /**
-     * @param PDO $pdo
+     * @var ImageManager
      */
-    public function __construct(PDO $pdo)
+    private $imageManager;
+
+    /**
+     * @param PDO          $pdo
+     * @param ImageManager $imageManager
+     */
+    public function __construct(PDO $pdo, ImageManager $imageManager)
     {
-        $this->pdo = $pdo;
+        $this->pdo          = $pdo;
+        $this->imageManager = $imageManager;
     }
 
     /**
@@ -41,6 +59,7 @@ class EventSectionsService implements EventSectionsServiceInterface
 SELECT
   es.event_section_id,
   IF (NULLIF(es.company_name,'') IS NULL, es.price, 0) as price,
+  ea.name,
   es.company_name,
   es.company_description,
   es.company_logo_base64,
@@ -70,22 +89,51 @@ EOT;
      */
     public function reserveSection(int $sectionId, array $inputs): void
     {
-        // TODO figure out requirements for input company logo (size?, format?) and add custom validator.
-
         $inputs['event_section_id'] = $sectionId;
         $validatedData              = Validator::make($inputs, [
             'event_section_id'    => ['required', new ActiveAndNonReservedEventSection()],
             'company_name'        => ['required', 'string', 'max:100'],
-            'company_description' => ['string', 'max:500'],
-            'company_logo_base64' => ['required', 'string'],
+            'company_description' => [ 'optional', 'nullable', 'string', 'max:500'],
+            'company_logo'        => ['required', 'image'],
             'contact_name'        => ['required', 'string', 'max:50'],
             'contact_phone'       => ['required', 'string', 'max:15'],
             'contact_email'       => ['required', 'string', 'max:255', 'email'],
         ])->validate();
         unset($validatedData['event_section_id']);
+        unset($validatedData['company_logo']);
+
+        // replace uploaded file with base64 representation
+        /** @var UploadedFile $companyLogo */
+        $companyLogo = $inputs['company_logo'];
+        $validatedData['company_logo_base64'] =
+            'data:image/png;base64,' . $this->convertImageFileToLogoBase64($companyLogo);
 
         /** @noinspection PhpUndefinedMethodInspection */
         EventSection::where('event_section_id', '=', $sectionId)->update($validatedData);
+    }
+
+    /**
+     * @param UploadedFile $image
+     *
+     * @return string
+     */
+    private function convertImageFileToLogoBase64(UploadedFile $image): string
+    {
+        $image = $this->getImageManager()->make($image);
+
+        $originalRatio = ((float)$image->getWidth()) / $image->getHeight();
+        $newRatio      = ((float)self::LOGO_WIDTH) / self::LOGO_HEIGHT;
+
+        if ($originalRatio > $newRatio) {
+            $image->widen(self::LOGO_WIDTH);
+        } else {
+            $image->heighten(self::LOGO_HEIGHT);
+        }
+
+        $encodedImage = $image->encode(self::LOGO_IMAGE_FORMAT)->getEncoded();
+        $imageBase64  = base64_encode($encodedImage);
+
+        return $imageBase64;
     }
 
     /**
@@ -94,5 +142,13 @@ EOT;
     private function getPDO(): PDO
     {
         return $this->pdo;
+    }
+
+    /**
+     * @return ImageManager
+     */
+    private function getImageManager(): ImageManager
+    {
+        return $this->imageManager;
     }
 }

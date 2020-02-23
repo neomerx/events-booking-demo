@@ -15,4 +15,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/events' , 'EventsController@index');
 Route::get('/events/{id}', 'EventsController@read');
-Route::put('/event-sections/{id}', 'EventSectionsController@reserve');
+Route::post('/event-sections/{id}', 'EventSectionsController@reserve');

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Api\Interfaces\EventSectionsServiceInterface;
+use App\Services\Contracts\EventSectionsServiceInterface;
 use App\Events\SectionReserved;
 use App\Http\Resources\EventSectionResource;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -34,7 +34,10 @@ final class EventSectionsController extends Controller
     {
         $this->authorize('reserve', [EventSectionResource::class, $sectionId, $request->input()]);
 
-        $this->getEventSectionService()->reserveSection($sectionId, $request->input());
+        $inputs                 = $request->input();
+        $inputs['company_logo'] = $request->file('company_logo');
+
+        $this->getEventSectionService()->reserveSection($sectionId, $inputs);
 
         event(new SectionReserved($sectionId));
 

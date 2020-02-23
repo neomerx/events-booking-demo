@@ -6,6 +6,7 @@ use App\Event;
 use App\EventSection;
 use App\Http\Controllers\EventsController;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class ApiTest extends TestCase
@@ -115,6 +116,10 @@ class ApiTest extends TestCase
     {
         $sectionToReserveId = $this->findFirstNonReservedEventSection()->event_section_id;
 
+        $mockFilePath = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'Data', 'logo_sample.png']);
+        $this->assertTrue(file_exists($mockFilePath));
+        $mockFile = UploadedFile::fake()->createWithContent('logo_sample.png', file_get_contents($mockFilePath));
+
         $inputs   = [
             'company_name'        => 'Company Name',
             'company_logo_base64' => 'currently not validated',
@@ -122,7 +127,18 @@ class ApiTest extends TestCase
             'contact_phone'       => '+11234567890',
             'contact_email'       => 'boo@mail.foo',
         ];
-        $response = $this->put("/api/event-sections/$sectionToReserveId", $inputs);
+
+        // emulate POST with attachments (native `post` cant work with attachments)
+        $server   = $this->transformHeadersToServerVars([]);
+        $cookies  = $this->prepareCookiesForRequest();
+        $response = $this->call(
+            'POST',
+            "/api/event-sections/$sectionToReserveId",
+            $inputs,
+            $cookies,
+            ['company_logo' => $mockFile],
+            $server
+        );
 
         $response->assertStatus(200);
 

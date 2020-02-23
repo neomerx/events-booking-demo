@@ -7,6 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @property int    event_section_id
  * @property int    price
+ * @property string name
  * @property string map_shape
  * @property string map_coordinates
  * @property string map_show_logo_at
@@ -31,6 +32,7 @@ class EventSectionResource extends JsonResource
         return [
             'event_section_id'    => $this->event_section_id,
             'price'               => $this->price,
+            'name'                => $this->name,
             'map_shape'           => $this->map_shape,
             'map_coordinates'     => $this->map_coordinates,
             'map_show_logo_at'    => $this->map_show_logo_at,

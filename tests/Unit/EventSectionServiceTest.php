@@ -2,13 +2,15 @@
 
 namespace Tests\Unit;
 
-use App\Api\EventSectionsService;
-use App\Api\Interfaces\EventSectionsServiceInterface;
 use App\Event;
 use App\EventSection;
+use App\Services\Contracts\EventSectionsServiceInterface;
+use App\Services\EventSectionsService;
 use Illuminate\Database\Connection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\ValidationException;
+use Intervention\Image\ImageManager;
 use Tests\TestCase;
 
 class EventSectionServiceTest extends TestCase
@@ -34,6 +36,7 @@ class EventSectionServiceTest extends TestCase
 
         foreach ($sections as $section) {
             $this->assertNotEmpty($section->price);
+            $this->assertNotEmpty($section->name);
             $this->assertNotEmpty($section->map_shape);
         }
     }
@@ -48,13 +51,17 @@ class EventSectionServiceTest extends TestCase
         // find first non-reserved event section
         $nonReservedSectionId = $this->findFirstNonReservedEventSection()->event_section_id;
 
+        $mockFilePath = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'Data', 'logo_sample.png']);
+        $this->assertTrue(file_exists($mockFilePath));
+        $mockFile = UploadedFile::fake()->createWithContent('logo_sample.png', file_get_contents($mockFilePath));
+
         $companyName = 'Company Name';
         $inputs      = [
-            'company_name'        => $companyName,
-            'company_logo_base64' => 'currently dummy then to replace with valid data',
-            'contact_name'        => 'John Doe',
-            'contact_phone'       => '+11234567890',
-            'contact_email'       => 'boo@mail.foo',
+            'company_name'  => $companyName,
+            'contact_name'  => 'John Doe',
+            'contact_phone' => '+11234567890',
+            'contact_email' => 'boo@mail.foo',
+            'company_logo'  => $mockFile,
         ];
 
         $service = $this->createService();
@@ -105,7 +112,7 @@ class EventSectionServiceTest extends TestCase
         $connection = app()->get(Connection::class);
         $pdo        = $connection->getPdo();
 
-        return new EventSectionsService($pdo);
+        return new EventSectionsService($pdo, new ImageManager());
     }
 
     /**

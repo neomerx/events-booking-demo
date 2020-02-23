@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Api\Interfaces;
+namespace App\Services\Contracts;
 
 use App\Http\Resources\EventSectionResource;
 use Illuminate\Database\Eloquent\Collection;
@@ -20,7 +20,7 @@ interface EventSectionsServiceInterface
      * Reserve event section.
      *
      * @param int   $sectionId Section ID.
-     * @param array $inputs    Company data (e.g. phone, email, etc)
+     * @param array $inputs    Company data (e.g. phone, email, etc).
      *
      * @return void
      */

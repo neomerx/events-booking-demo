@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Api\Interfaces;
+namespace App\Services\Contracts;
 
 use App\Http\Resources\EventMarkerResource;
 use App\Http\Resources\EventResource;
